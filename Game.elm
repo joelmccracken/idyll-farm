@@ -6,7 +6,6 @@ import StartApp.Simple as StartApp
 main =
   StartApp.start { model = initialModel, view = view, update = update }
 
-
 type alias GameInstance =
   { totalPlants : Int
   , money       : Int
@@ -23,13 +22,7 @@ type alias Model =
   , greetingDismissed  : Bool
   }
 
-type CurrentDisplay = FrontScreen
-                    | GameWindow
-                    | Settings
-
-type GameState      = NotStarted
-                    | InProgress
-
+initialModel : Model
 initialModel = { currentGame =
                    { totalPlants = 0
                    , money       = 100
@@ -40,33 +33,45 @@ initialModel = { currentGame =
                , greetingDismissed  = False
                }
 
+type CurrentDisplay = FrontScreen
+                    | GameWindow
+                    | Settings
+
+type GameState      = NotStarted
+                    | InProgress
+
 type Action = Increment
             | Decrement
             | DismissGreeting
             | NewGame
 
+updateCurrentGame : Model -> (GameInstance ->GameInstance) -> Model
+updateCurrentGame model updater =
+  {model | currentGame = updater(model.currentGame)}
+
+
+update : Action -> Model -> Model
 update action model =
   case action of
-    Increment       -> { model | totalPlants = model.totalPlants + 1 }
-    Decrement       -> { model | totalPlants = model.totalPlants - 1 }
+    Increment       -> updateCurrentGame model (\game-> { game | totalPlants = game.totalPlants + 1 })
+    Decrement       -> updateCurrentGame model (\game-> { game | totalPlants = game.totalPlants - 1 })
     DismissGreeting -> { model | greetingDismissed = True }
-    NewGame         -> { model | currentDisplay = }
+    NewGame         -> { model | currentDisplay = GameWindow }
 
+
+view : Signal.Address Action -> Model -> Html.Html
 view address model =
-  let viewMethod =
-        case model.currentDisplay of
-          FrontScreen -> viewFrontScreen
-          GameWindow  -> viewGame
-          Settings    -> viewSettings
-  in
-    viewMethod address model
+  case model.currentDisplay of
+    FrontScreen -> viewFrontScreen address
+    GameWindow  -> viewGame address model
+    Settings    -> viewSettings address model
 
-viewFrontScreen address model =
+viewFrontScreen : Signal.Address Action -> Html.Html
+viewFrontScreen address =
   div []
         [ text "Idyll Farm"
         , button [ onClick address NewGame ] [ text "New Game" ]
         ]
-
 
 viewSettings address model =
   text "not implemented yet!"
@@ -75,7 +80,7 @@ viewGame address model =
   div []
         [ greetingView address model
         , button [ onClick address Decrement ] [ text "-" ]
-        , div [] [ text (toString model.totalPlants) ]
+        , div [] [ text (toString model.currentGame.totalPlants) ]
         , button [ onClick address Increment ] [ text "+" ]
         ]
 
