@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-elm-make Game.elm
+mkdir -p build
+elm-make Game.elm --output build/index.html
