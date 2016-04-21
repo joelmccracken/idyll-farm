@@ -3,9 +3,12 @@ import Html exposing (div, button, text, p)
 import Html.Events exposing (onClick)
 import StartApp.Simple as StartApp
 
-main =
-  StartApp.start { model = initialModel, view = view, update = update }
+-- main =
+--   StartApp.start { model = initialModel, view = view, update = update }
 
+main : Signal Element
+main =
+  Signal.map
 type alias GameInstance =
   { totalPlants : Int
   , money       : Int
@@ -44,6 +47,7 @@ type Action = Increment
             | Decrement
             | DismissGreeting
             | NewGame
+            | ContinueGame
 
 updateCurrentGame : Model -> (GameInstance ->GameInstance) -> Model
 updateCurrentGame model updater =
@@ -57,7 +61,7 @@ update action model =
     Decrement       -> updateCurrentGame model (\game-> { game | totalPlants = game.totalPlants - 1 })
     DismissGreeting -> { model | greetingDismissed = True }
     NewGame         -> { model | currentDisplay = GameWindow }
-
+    ContinueGame    -> { model | currentDisplay = GameWindow }
 
 view : Signal.Address Action -> Model -> Html.Html
 view address model =
@@ -69,9 +73,10 @@ view address model =
 viewFrontScreen : Signal.Address Action -> Html.Html
 viewFrontScreen address =
   div []
-        [ text "Idyll Farm"
-        , button [ onClick address NewGame ] [ text "New Game" ]
-        ]
+      [ div [] [ text "Idyll Farm" ]
+      , div [] [ button [ onClick address NewGame ]      [ text "New Game" ] ]
+      , div [] [ button [ onClick address ContinueGame ] [ text "Continue Game" ] ]
+      ]
 
 viewSettings address model =
   text "not implemented yet!"
@@ -90,7 +95,7 @@ greetingView address model =
     False ->
       div []
           [ text """
-                    Hi <yourname>!
+                  Hi <yourname>!
 
                     You just inherited some land.
 
