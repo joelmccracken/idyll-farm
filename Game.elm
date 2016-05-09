@@ -3,18 +3,17 @@ import Html exposing (div, button, text, p)
 import Html.Events exposing (onClick)
 import StartApp.Simple as StartApp
 
--- main =
---   StartApp.start { model = initialModel, view = view, update = update }
-
-main : Signal Element
 main =
-  Signal.map
+  StartApp.start { model = initialModel, view = view, update = update }
+
+
 type alias GameInstance =
   { totalPlants : Int
   , money       : Int
   , day         : Int
   , actionsLeft : Int
   }
+
 
 type alias Model =
   -- logic model
@@ -24,6 +23,7 @@ type alias Model =
   , currentDisplay     : CurrentDisplay
   , greetingDismissed  : Bool
   }
+
 
 initialModel : Model
 initialModel = { currentGame =
@@ -36,18 +36,21 @@ initialModel = { currentGame =
                , greetingDismissed  = False
                }
 
+
 type CurrentDisplay = FrontScreen
                     | GameWindow
-                    | Settings
+                    | Menu
 
 type GameState      = NotStarted
                     | InProgress
+
 
 type Action = Increment
             | Decrement
             | DismissGreeting
             | NewGame
             | ContinueGame
+
 
 updateCurrentGame : Model -> (GameInstance ->GameInstance) -> Model
 updateCurrentGame model updater =
@@ -63,12 +66,14 @@ update action model =
     NewGame         -> { model | currentDisplay = GameWindow }
     ContinueGame    -> { model | currentDisplay = GameWindow }
 
+
 view : Signal.Address Action -> Model -> Html.Html
 view address model =
   case model.currentDisplay of
     FrontScreen -> viewFrontScreen address
     GameWindow  -> viewGame address model
-    Settings    -> viewSettings address model
+    Menu        -> viewMenu address model
+
 
 viewFrontScreen : Signal.Address Action -> Html.Html
 viewFrontScreen address =
@@ -78,8 +83,10 @@ viewFrontScreen address =
       , div [] [ button [ onClick address ContinueGame ] [ text "Continue Game" ] ]
       ]
 
-viewSettings address model =
+
+viewMenu address model =
   text "not implemented yet!"
+
 
 viewGame address model =
   div []
